@@ -1,0 +1,203 @@
+#!/bin/bash
+
+
+#################
+# FUNCTIONS
+#################
+
+function error_exit
+{
+        echo "ERROR : $1" 1>&2
+        exit 1
+}
+
+
+#===  FUNCTION  =================================================================
+# NAME        : RETURN_MATCH_SUBSTRING
+# DESCRIPTION : check if a target string contains substrings from an array string
+# PARAMETER 1 : string
+# PARAMETER 2 : array of strings (substrings)
+# RETURNS     : idem as above, but also echoes the value of the matching substring
+#=================================================================================
+
+return_match_string () {
+
+    string_aux=$(echo $1 | awk '{print tolower($0)}')
+
+#    echo ''
+#    echo -e "\tString\t:\t$1"
+#    echo -e "\tList\t:\t$2"
+
+    for substring in $2 ; do
+        if contains_substring "${string_aux}" "${substring}"; then
+            eval "$3=$substring"
+            return 0
+        fi
+    done
+
+    eval "$3='meh'"
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : SERIES_POLARITY
+# DESCRIPTION : receives a series name and checks if its polarity is RL or LR
+# PARAMETER 1 : series name (STRING)
+# RETURNS     : echo the polarity string (_RL or _LR)
+#===============================================================================
+
+series_polarity () {
+    result=''
+    return_match_string $1 "_lr _rl _ap _pa" result > /dev/null 2>&1 # dump all the standard output, otherwise is written to a variable and returned
+    result=$(echo $result | awk '{print toupper($0)}')
+    echo "$result"
+
+
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : IS_SBREF
+# DESCRIPTION : checks if a bold series is an sbref serie
+# PARAMETER 1 : series name (STRING)
+# RETURNS     : true or false (1 or 0)
+#===============================================================================
+
+is_sbref () {
+
+   if contains_substring $1 "_sbref"; then
+	#echo "true"
+	return 0
+   else
+	#echo "false"
+	return 1
+   fi
+
+}
+
+#===  FUNCTION  =========================================================================================
+# NAME        : EXTENSION_EXISTS
+# DESCRIPTION : given a string and a folder, checks if a file containing  the string exists in the folder
+# PARAMETER 1 :
+# PARAMETER 2 :
+# RETURNS     :
+#========================================================================================================
+
+extension_exists () {
+    count=$(find $2 -maxdepth 1 -name "*.${1}" | wc -l)
+    if [ "$count" == "0"  ]; then # no file with that extension found in folder $2
+        echo "false"
+        return 0
+
+    else
+        echo "true"
+        return 1
+    fi
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : FIND_NII
+# DESCRIPTION : return the name of a .nii.gz file
+# PARAMETER 1 : folder name (path)
+# RETURNS     : name of .nii files
+#===============================================================================
+find_nii () { #returns string with file names, Correct this (array-string stuff)
+    filename=$(find "${1}" -maxdepth 1 -type f -name '*.nii')
+    echo "$filename"
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : FIND_NIIGZ
+# DESCRIPTION : return the name of a .nii.gz file
+# PARAMETER 1 : folder name (path)
+# RETURNS     : name of .nii.gz files
+#===============================================================================
+find_niigz () { #returns string with file names, Correct this (array-string stuff)
+    filename=$(find "${1}" -maxdepth 1 -type f -name '*.nii.gz')
+    echo "$filename"
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : GET_VALUE
+# DESCRIPTION : reads a string of the form PARAM=VALUE and returns $VALUE
+# PARAMETER 1 : string, name of parameter
+# PARAMETER 2 : text file
+# RETURNS     : paramter value
+#===============================================================================
+# Usage:VALUE=$(get_value "IN_DIR" "preprocess_config.txt")
+
+get_value () {
+
+        if [[ -f $2 ]]; then
+                name_value=$(grep -w $1 $2)
+                value=$(echo "${name_value}" | cut -d'=' -f 2)
+                echo $value
+                return 0
+        else
+                return 1
+	fi
+
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : ASK_CONFIRMATION
+# DESCRIPTION : asks a yes/no question 
+# PARAMETER 1 : question
+# PARAMETER 2 : 
+# RETURNS     : 0 if YES, 1 if NO
+#===============================================================================
+
+ask_confirmation () {
+
+	YES_WORDS="y yes"
+	echo -e "$1 : " 
+	read answer
+
+	if contains_substring "${answer}" "${YES_WORDS}"; then
+        	echo -e "Your answer was positive: $answer"
+		return 0
+	else
+        	echo -e "Your answer was negative: $answer"
+                return 1
+	fi
+
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : CONTAINS_SUBSTRING
+# DESCRIPTION : find a substring in a list of strings 
+# PARAMETER 1 : string
+# PARAMETER 2 : list of strings
+# RETURNS     : 0 if list contains substring, 1 if not
+#===============================================================================
+
+contains_substring () {
+
+    string_aux=$(echo $1 | awk '{print tolower($0)}')
+
+    # $1: substring
+    # $2: DISCARD_WORDS="localizer bias aahscout scout nav norm"
+
+
+    for substring in $2 ; do
+
+        if [[ "$string_aux" =~ "$substring" ]]; then
+            #echo -e "\tRESULT\t:\t'$1' contains '$substring'"
+            return 0
+
+        else
+            #echo -e "\tRESULT\t:\t'$1' does not contain '$substring'."
+        continue
+        fi
+    done
+    return 1
+}
+
+#===  FUNCTION  ================================================================
+# NAME        : 
+# DESCRIPTION : 
+# PARAMETER 1 : 
+# PARAMETER 2 : 
+# RETURNS     :
+#===============================================================================
+
+
+

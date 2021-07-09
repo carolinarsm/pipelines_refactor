@@ -1,0 +1,8 @@
+ccp_dcm2nii_batch.sh	:	nodes=1:ppn=1,mem=10gb,vmem=10gb,walltime=4:00:00
+ccp_preFS_batch.sh	:	nodes=1:ppn=2,mem=10gb,vmem=10gb,walltime=6:00:00
+ccp_FS_batch.sh		:	nodes=1:ppn=2,mem=10gb,vmem=10gb,walltime=24:00:00
+ccp_postFS_batch.sh	:	nodes=1:ppn=4,mem=10gb,vmem=10gb,walltime=6:00:00
+ccp_volume_batch.sh	:	nodes=1:ppn=4,mem=12gb,vmem=12gb,walltime=24:00:00
+ccp_surface_batch.sh	:	nodes=1:ppn=4,mem=10gb,vmem=10gb,walltime=12:00:00
+
+(volume and resurces will depend on amount of data, for example, number of tasks to process)
